@@ -111,14 +111,16 @@ class Game(object):
     def __init__(self, player_1, player_2, dice):
         """This is the Game class constructor, it  initiates the game, and the
         coin toss to select the player who will go first."""
+        self.turn_total = 0
         self.player_1 = player_1
         self.player_1.name = 'Player 1'
         self.player_1.score = 0
+        self.player_1.turn_total = self.turn_total
         self.player_2 = player_2
         self.player_2.name = 'Player 2'
         self.player_2.score = 0
+        self.player_2.turn_total = self.turn_total
         self.dice = dice
-        self.turn_total = 0
         random.seed(0)
         coin_toss = random.randint(1, 2)
         if coin_toss == 1:
@@ -147,6 +149,8 @@ class Game(object):
             self.next_players_turn()
         else:
             self.turn_total = self.turn_total + self.dice.value
+            self.player_1.turn_total = self.turn_total
+            self.player_2.turn_total = self.turn_total
             print 'The roll resulted in a:', self.dice.value
             print 'Turn total is:', self.turn_total
             self.current_player.hold_or_roll()
@@ -264,8 +268,6 @@ def main():
                     item[1] = Player()
                     dice = Dice()
                     Game(item[0], item[1], dice)
-        #try:
-
         if args.player1:
             player1_type = args.player1
         else:
@@ -275,15 +277,13 @@ def main():
             player2_type = args.player2
         else:
             player2_type = 'human'
-        #finally:
         dice = Dice()
         create = PlayerFactory()
         player_1 = create.player_type(player1_type)
         player_2 = create.player_type(player2_type)
         Game(player_1, player_2, dice)
-
-        if not args.numPlayers or args.player1 or args.player2:
-            new_game()
+        #if not args.numPlayers or args.player1 or args.player2:
+            #new_game()
     except:
         print
         print '*' * 80
@@ -291,8 +291,7 @@ def main():
             Exiting the program......Good Bye.'
         print '*' * 80
         print
-        raise
-        #SystemExit
+        SystemExit
 
 #python -i IS211_Assignment8.py --player1 computer --player2 computer
 
