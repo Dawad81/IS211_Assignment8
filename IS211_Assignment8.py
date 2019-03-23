@@ -111,6 +111,7 @@ class Game(object):
     def __init__(self, player_1, player_2, dice):
         """This is the Game class constructor, it  initiates the game, and the
         coin toss to select the player who will go first."""
+        #self.start_time = time.time()
         self.turn_total = 0
         self.player_1 = player_1
         self.player_1.name = 'Player 1'
@@ -138,6 +139,7 @@ class Game(object):
     def players_turn(self):
         """This function provides the score for the players turn based on the
         results of the hold_or_roll()."""
+        self.timer = time.time()
         print '=' * 25
         print 'Player 1\'s score is:', self.player_1.score
         print 'Player 2\'s score is:', self.player_2.score
@@ -197,6 +199,66 @@ class Game(object):
         self.player_1 = None
         self.player_2 = None
         self.dice = None
+
+
+class TimedGameProxy(Game):
+    start_time = time.time()
+
+    def __init__(self, player_1, player_2, dice):
+        Game.__init__(self, player_1, player_2, dice)
+
+        #self.start_time = time.time()
+
+    def players_turn(self):
+        self.timer = time.time()
+        if self.timer - self.start_time >= 60:
+            self.timed_reset()
+        else:
+            print '=' * 25
+            print 'Player 1\'s score is:', self.player_1.score
+            print 'Player 2\'s score is:', self.player_2.score
+            print '=' * 25
+            self.dice.roll()
+            if self.dice.value == 1:
+                print 'The roll resulted in a: 1. Your score is 0.'
+                self.turn_total = 0
+                self.next_players_turn()
+            else:
+                self.turn_total = self.turn_total + self.dice.value
+                self.player_1.turn_total = self.turn_total
+                self.player_2.turn_total = self.turn_total
+                print 'The roll resulted in a:', self.dice.value
+                print 'Turn total is:', self.turn_total
+                self.current_player.hold_or_roll()
+                if self.current_player.hold == True \
+                        and self.current_player.roll == False:
+                    self.current_player.score = self.current_player.score + \
+                                                self.turn_total
+                    self.next_players_turn()
+                elif self.current_player.hold == False and \
+                        self.current_player.roll == True:
+                    self.players_turn()
+
+    def timed_reset(self):
+        #print 'Times Up!...GAME OVER!'
+        if self.player_1.score >= self.player_2.score:
+            print 'Times Up!...GAME OVER!'
+            print 'Player 1 is the WINNER!'
+            print "With a total score of:", self.player_1.score
+            self.reset()
+            print '-' * 30
+            print 'Program exiting......'
+            print 'Goodbye!'
+        elif self.player_2.score >= self.player_1.score:
+            print 'Times Up!...GAME OVER!'
+            print 'Player 2 is the WINNER!'
+            print 'With a total score of:', self.player_2.score
+            self.reset()
+            print '-' * 30
+            print 'Program exiting......'
+            print 'Goodbye!'
+
+
 
 
 def matchmaking(players=list, teams=int, min_team=2, max_team=2):
@@ -277,11 +339,15 @@ def main():
             player2_type = args.player2
         else:
             player2_type = 'human'
+
         dice = Dice()
         create = PlayerFactory()
         player_1 = create.player_type(player1_type)
         player_2 = create.player_type(player2_type)
-        Game(player_1, player_2, dice)
+        if args.timed == 'yes':
+            TimedGameProxy(player_1, player_2, dice)
+        else:
+            Game(player_1, player_2, dice)
         #if not args.numPlayers or args.player1 or args.player2:
             #new_game()
     except:
@@ -291,9 +357,10 @@ def main():
             Exiting the program......Good Bye.'
         print '*' * 80
         print
-        SystemExit
+        raise
+        #SystemExit
 
-#python -i IS211_Assignment8.py --player1 computer --player2 computer
+#python -i IS211_Assignment8.py --player2 computer --timed yes
 
 if __name__ == '__main__':
     main()
