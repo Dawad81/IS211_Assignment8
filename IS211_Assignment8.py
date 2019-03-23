@@ -76,15 +76,18 @@ class Player(object):
 
 
 class ComputerPlayer(Player):
+    """This represents the Computer Player Object."""
     def hold_or_roll(self):
+        """This function represents the logic or strategy of the Computer
+        player."""
         total1 = 25
         total2 = 100 - self.score
         if total1 < total2:
-            holdlimit = total1
+            hold_limit = total1
         else:
-            holdlimit = total2
+            hold_limit = total2
 
-        if self.turn_total < holdlimit:
+        if self.turn_total < hold_limit:
             print "Computer will roll"
             self.hold = False
             self.roll = True
@@ -95,15 +98,14 @@ class ComputerPlayer(Player):
 
 
 class PlayerFactory(object):
-    def __init__(self):
-        return None
-
+    """This represents the Player Factory Object."""
     def player_type(self, arg_entered):
+        """This function decides what type of player to create based on the
+        inputted args."""
         if arg_entered == 'human':
             return Player()
         elif arg_entered == 'computer':
             return ComputerPlayer()
-
 
 
 class Game(object):
@@ -111,7 +113,6 @@ class Game(object):
     def __init__(self, player_1, player_2, dice):
         """This is the Game class constructor, it  initiates the game, and the
         coin toss to select the player who will go first."""
-        #self.start_time = time.time()
         self.turn_total = 0
         self.player_1 = player_1
         self.player_1.name = 'Player 1'
@@ -139,7 +140,6 @@ class Game(object):
     def players_turn(self):
         """This function provides the score for the players turn based on the
         results of the hold_or_roll()."""
-        self.timer = time.time()
         print '=' * 25
         print 'Player 1\'s score is:', self.player_1.score
         print 'Player 2\'s score is:', self.player_2.score
@@ -202,14 +202,13 @@ class Game(object):
 
 
 class TimedGameProxy(Game):
+    """This represents the Timed Game Proxy Object"""
     start_time = time.time()
 
-    def __init__(self, player_1, player_2, dice):
-        Game.__init__(self, player_1, player_2, dice)
-
-        #self.start_time = time.time()
-
     def players_turn(self):
+        """This function provides the score for the players turn based on the
+        results of the hold_or_roll(). It also keeps track of the elapsed time
+        and when it exceeds one minute it will activate the end of the game."""
         self.timer = time.time()
         if self.timer - self.start_time >= 60:
             self.timed_reset()
@@ -240,25 +239,26 @@ class TimedGameProxy(Game):
                     self.players_turn()
 
     def timed_reset(self):
-        #print 'Times Up!...GAME OVER!'
+        """This function decideds the winner of the game should the time run
+        out. The player with the highest score after one minute is the winner"""
         if self.player_1.score >= self.player_2.score:
-            print 'Times Up!...GAME OVER!'
-            print 'Player 1 is the WINNER!'
-            print "With a total score of:", self.player_1.score
+            print '*' * 10, 'Times Up!...GAME OVER!', '*' * 10
+            print '*' * 10, 'Player 1 is the WINNER!', '*' * 10
+            print '*' * 10, "With a total score of:", self.player_1.score,\
+                '*' * 10
             self.reset()
             print '-' * 30
             print 'Program exiting......'
             print 'Goodbye!'
         elif self.player_2.score >= self.player_1.score:
-            print 'Times Up!...GAME OVER!'
-            print 'Player 2 is the WINNER!'
-            print 'With a total score of:', self.player_2.score
+            print '*' * 10, 'Times Up!...GAME OVER!', '*' * 10
+            print '*' * 10, 'Player 2 is the WINNER!', '*' * 10
+            print '*' * 10, 'With a total score of:', self.player_2.score,\
+                '*' * 10
             self.reset()
             print '-' * 30
             print 'Program exiting......'
             print 'Goodbye!'
-
-
 
 
 def matchmaking(players=list, teams=int, min_team=2, max_team=2):
@@ -277,15 +277,41 @@ def matchmaking(players=list, teams=int, min_team=2, max_team=2):
             game.append(teamlist)
     return game
 
+
 def main():
-    """This function initiates the game of Pig, with multiple players, in
-    multiple games, via the comand line with the --numPlayers argument.
-    Additionaly, if no --numPlayer is enterd it will automaticly prompt to ask
-    if you want to begin a game of Pig with just 2 players."""
+    """This function initiates the game of Pig, based on the args entered on
+    the command line.
+
+    --numPlayers (int):
+        If the --numPlayers arg is entered, a game of Pig will initiate with
+        multiple players, in multiple games.
+
+    --player1 (str):
+        If the --player1 arg is entered they type of player entered will be
+        instantiated Player() for 'human', ComputerPlayer() for 'computer'.
+
+    --player2 (str):
+        If the --player2 arg is entered they type of player entered will be
+        instantiated Player() for 'human', ComputerPlayer() for 'computer'.
+
+    --timed (str):
+        If the --timed arg is entered then the TimedGameProxy() will be used
+        to instantiate a game of Pig. This will limit the time of the game to
+        one minute. Which ever player has the highest score after one minute,
+        or reaches 100 pints with in one minute is the winner.
+
+    Additionally, if no --numPlayer, --player1, --player2, or --timed args are
+    entered, the program will automatically prompt to ask if you want to begin
+    a game of Pig with just 2 players."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--player1", type=str, help="Do you want Player 1 to be 'human' or 'computer'? Plese enter [human] or [computer]  ")
-    parser.add_argument("--player2", type=str, help="Do you want Player 2 to be 'human' or 'computer'? Plese enter [human] or [computer]  ")
-    parser.add_argument("--timed", help="Would you like to play a one minute timed game?")
+    parser.add_argument("--player1", type=str,
+                        help="Do you want Player 1 to be 'human' or 'computer'?"
+                             "Please enter [human] or [computer]  ")
+    parser.add_argument("--player2", type=str,
+                        help="Do you want Player 2 to be 'human' or 'computer'?"
+                             "Please enter [human] or [computer]  ")
+    parser.add_argument("--timed", type=str,
+                        help="Would you like to play a one minute timed game?")
     parser.add_argument("--numPlayers",
                         help="Enter the number of players.(optional)",
                         required=False, type=int)
@@ -360,7 +386,7 @@ def main():
         raise
         #SystemExit
 
-#python -i IS211_Assignment8.py --player2 computer --timed yes
+#python -i IS211_Assignment8.py --player1 human --player2 computer --timed yes
 
 if __name__ == '__main__':
     main()
