@@ -352,10 +352,23 @@ def main():
                     print '{} will be Player 2'.format(item[1])
                     print
                     print '=*' * 24
-                    item[0] = Player()
-                    item[1] = Player()
+                    if args.player1:
+                        player1_type = args.player1
+                    else:
+                        player1_type = 'human'
+
+                    if args.player2:
+                        player2_type = args.player2
+                    else:
+                        player2_type = 'human'
                     dice = Dice()
-                    Game(item[0], item[1], dice)
+                    create = PlayerFactory()
+                    item[0] = create.player_type(player1_type)
+                    item[1] = create.player_type(player2_type)
+                    if args.timed == 'yes':
+                        TimedGameProxy(item[0], item[1], dice)
+                    else:
+                        Game(item[0], item[1], dice)
         if args.player1:
             player1_type = args.player1
         else:
@@ -374,8 +387,6 @@ def main():
             TimedGameProxy(player_1, player_2, dice)
         else:
             Game(player_1, player_2, dice)
-        #if not args.numPlayers or args.player1 or args.player2:
-            #new_game()
     except:
         print
         print '*' * 80
@@ -383,10 +394,8 @@ def main():
             Exiting the program......Good Bye.'
         print '*' * 80
         print
-        raise
-        #SystemExit
+        SystemExit
 
-#python -i IS211_Assignment8.py --player1 human --player2 computer --timed yes
 
 if __name__ == '__main__':
     main()
